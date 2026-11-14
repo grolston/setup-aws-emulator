@@ -21,7 +21,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: ShellCheck
         run: shellcheck scripts/*.sh tests/*.sh
@@ -41,7 +41,7 @@ jobs:
             version: '1.0.367'
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup AWS Emulator
         id: emulator
@@ -79,7 +79,7 @@ jobs:
     name: AWS SDKs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup AWS Emulator
         uses: ./
@@ -99,7 +99,7 @@ jobs:
     name: Options (random port, auth off, no env export)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup AWS Emulator
         id: emulator
@@ -129,7 +129,7 @@ jobs:
     name: Fails clearly on macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup AWS Emulator
         id: emulator
