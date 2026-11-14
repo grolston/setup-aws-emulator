@@ -1,0 +1,111 @@
+name: Setup AWS Emulator
+description: >-
+  Install and start AWS Emulator, a local emulator of the AWS APIs, and point
+  the AWS CLI and AWS SDKs at it. No AWS account or credentials required.
+author: grolston
+
+branding:
+  icon: cloud
+  color: orange
+
+inputs:
+  version:
+    description: >-
+      AWS Emulator version to install, for example `1.0.367`. Use `latest` for
+      the newest LTS release. Pin a version for reproducible test results.
+    required: false
+    default: latest
+  port:
+    description: >-
+      Port the emulator listens on (HTTPS, bound to 127.0.0.1). Use `0` to let
+      the operating system pick a free port; the chosen port is reported in the
+      `endpoint-url` output.
+    required: false
+    default: '9297'
+  telemetry:
+    description: >-
+      Whether the emulator sends anonymous usage telemetry to AWS. `on` or
+      `off`. This action defaults to `off`.
+    required: false
+    default: 'off'
+  auth:
+    description: >-
+      Whether the emulator requires requests signed with the credentials it
+      generates. `on` or `off`. Leave this `on` so tests exercise the same
+      request signing path they use against AWS.
+    required: false
+    default: 'on'
+  export-env:
+    description: >-
+      When `true`, export AWS_ENDPOINT_URL, credentials, region, and CA bundle
+      environment variables to later steps in the job, so the AWS CLI and SDKs
+      talk to the emulator without further configuration.
+    required: false
+    default: 'true'
+  verify-signature:
+    description: >-
+      When `true`, verify the package GPG signature against the AWS publishing
+      key before installing it.
+    required: false
+    default: 'true'
+  idle-timeout:
+    description: >-
+      Optional. Stop the emulator after this many seconds without an API call
+      (1 to 31536000). Leave empty to keep it running until the job ends.
+    required: false
+    default: ''
+  startup-timeout:
+    description: Seconds to wait for the emulator to report healthy before failing the step.
+    required: false
+    default: '60'
+
+outputs:
+  version:
+    description: The AWS Emulator version that was installed.
+    value: ${{ steps.setup.outputs.version }}
+  endpoint-url:
+    description: The emulator endpoint, for example `https://127.0.0.1:9297`.
+    value: ${{ steps.setup.outputs.endpoint-url }}
+  health-check-url:
+    description: The emulator health route, which returns HTTP 200 when it is ready.
+    value: ${{ steps.setup.outputs.health-check-url }}
+  ca-file:
+    description: Path to the PEM certificate that signs the emulator's HTTPS certificate.
+    value: ${{ steps.setup.outputs.ca-file }}
+  truststore-file:
+    description: Path to a PKCS12 truststore (no password) containing the emulator certificate, for Java.
+    value: ${{ steps.setup.outputs.truststore-file }}
+  credentials-file:
+    description: Path to the shared credentials file the emulator generated. Empty when `auth` is `off`.
+    value: ${{ steps.setup.outputs.credentials-file }}
+  config-file:
+    description: Path to the AWS config file the emulator generated.
+    value: ${{ steps.setup.outputs.config-file }}
+  region:
+    description: The Region the emulator serves.
+    value: ${{ steps.setup.outputs.region }}
+  account-id:
+    description: The account ID the emulator uses.
+    value: ${{ steps.setup.outputs.account-id }}
+  pid:
+    description: Process ID of the running emulator.
+    value: ${{ steps.setup.outputs.pid }}
+  log-file:
+    description: Path to the emulator log file.
+    value: ${{ steps.setup.outputs.log-file }}
+
+runs:
+  using: composite
+  steps:
+    - id: setup
+      shell: bash
+      run: bash "${GITHUB_ACTION_PATH}/scripts/setup.sh"
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_PORT: ${{ inputs.port }}
+        INPUT_TELEMETRY: ${{ inputs.telemetry }}
+        INPUT_AUTH: ${{ inputs.auth }}
+        INPUT_EXPORT_ENV: ${{ inputs.export-env }}
+        INPUT_VERIFY_SIGNATURE: ${{ inputs.verify-signature }}
+        INPUT_IDLE_TIMEOUT: ${{ inputs.idle-timeout }}
+        INPUT_STARTUP_TIMEOUT: ${{ inputs.startup-timeout }}
